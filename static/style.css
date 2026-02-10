@@ -1,0 +1,509 @@
+:root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a2e;
+    --bg-card: #16213e;
+    --bg-hover: #1f3460;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --text-hint: #666;
+    --accent: #6c63ff;
+    --accent-hover: #5a52d5;
+    --success: #4caf50;
+    --error: #f44336;
+    --warning: #ff9800;
+    --border: #2a2a4a;
+    --radius: 12px;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+}
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+    text-align: center;
+    padding: 24px 0 16px;
+}
+
+.app-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6c63ff, #e91e63);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-size: 0.95rem;
+}
+
+/* ===== CONNECTION STATUS ===== */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-top: 12px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.connected {
+    background: rgba(76, 175, 80, 0.15);
+}
+.status-indicator.connected .status-dot {
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+}
+
+.status-indicator.disconnected {
+    background: rgba(244, 67, 54, 0.15);
+}
+.status-indicator.disconnected .status-dot {
+    background: var(--error);
+}
+
+.status-indicator.checking {
+    background: rgba(255, 152, 0, 0.15);
+}
+.status-indicator.checking .status-dot {
+    background: var(--warning);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ===== COLAB URL BAR ===== */
+.colab-url-bar {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.colab-url-bar input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.colab-url-bar input:focus {
+    border-color: var(--accent);
+}
+
+.colab-url-bar button {
+    padding: 10px 24px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.colab-url-bar button:hover {
+    background: var(--accent-hover);
+}
+
+/* ===== MAIN LAYOUT ===== */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 16px;
+}
+
+@media (max-width: 800px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== UPLOAD CARDS ===== */
+.upload-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+
+.upload-card h3,
+.control-group h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 32px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s, background 0.3s;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(108, 99, 255, 0.05);
+}
+
+.upload-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.drop-zone-prompt p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.upload-hint {
+    color: var(--text-hint);
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 4px;
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.clear-btn {
+    margin-top: 8px;
+    padding: 6px 16px;
+    background: transparent;
+    color: var(--error);
+    border: 1px solid var(--error);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.clear-btn:hover {
+    background: rgba(244, 67, 54, 0.1);
+}
+
+/* ===== CLOTH TYPE BUTTONS ===== */
+.control-group {
+    margin-bottom: 16px;
+}
+
+.type-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.type-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.type-btn:hover {
+    border-color: var(--accent);
+}
+
+.type-btn.active {
+    border-color: var(--accent);
+    background: rgba(108, 99, 255, 0.15);
+    color: var(--accent);
+}
+
+/* ===== ADVANCED SETTINGS ===== */
+.advanced-settings {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+
+.advanced-settings summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    user-select: none;
+}
+
+.settings-content {
+    margin-top: 16px;
+}
+
+.setting-row {
+    margin-bottom: 14px;
+}
+
+.setting-row label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.setting-row input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 6px;
+}
+
+.setting-row input[type="number"] {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    width: 120px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.setting-row input[type="number"]:focus {
+    border-color: var(--accent);
+}
+
+.setting-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-hint);
+    margin-top: 2px;
+}
+
+/* ===== PRIMARY BUTTON ===== */
+.primary-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.primary-btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.primary-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.primary-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== STATUS MESSAGE ===== */
+.status-message {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    min-height: 20px;
+    color: var(--text-secondary);
+}
+
+/* ===== RESULT SECTION ===== */
+.result-section {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+    position: sticky;
+    top: 20px;
+}
+
+.result-section h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.result-container {
+    min-height: 400px;
+}
+
+.result-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: var(--text-hint);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+}
+
+.placeholder-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.placeholder-content {
+    text-align: center;
+}
+
+/* ===== COMPARISON VIEW ===== */
+.comparison-view {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.comparison-item {
+    flex: 1;
+    text-align: center;
+}
+
+.comparison-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-hint);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.comparison-img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+    max-height: 400px;
+}
+
+.comparison-divider {
+    width: 2px;
+    background: var(--accent);
+    align-self: stretch;
+    border-radius: 1px;
+    min-height: 200px;
+    opacity: 0.5;
+}
+
+.result-info {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* ===== SECONDARY BUTTON ===== */
+.secondary-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 12px;
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+    background: rgba(108, 99, 255, 0.1);
+}
+
+/* ===== FOOTER ===== */
+.app-footer {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--text-hint);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+}
