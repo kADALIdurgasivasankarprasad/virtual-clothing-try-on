@@ -4,9 +4,23 @@ import httpx
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 import uvicorn
 
 app = FastAPI(title="Virtual Try-On Local Server")
+
+
+class NoCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/static") or request.url.path == "/":
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
+
+app.add_middleware(NoCacheMiddleware)
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
 PROXY_HEADERS = {"User-Agent": "VirtualTryOn-LocalServer"}
@@ -49,20 +63,32 @@ async def health_proxy():
             content={"status": "error", "detail": "Colab URL not configured"},
         )
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             resp = await client.get(
                 f"{COLAB_URL}/api/health", headers=PROXY_HEADERS
             )
-            return JSONResponse(content=resp.json(), status_code=resp.status_code)
+            try:
+                data = resp.json()
+            except Exception:
+                return JSONResponse(
+                    status_code=503,
+                    content={"status": "error", "detail": "Colab returned non-JSON response (tunnel may be starting up)"},
+                )
+            return JSONResponse(content=data, status_code=resp.status_code)
     except httpx.ConnectError:
         return JSONResponse(
             status_code=503,
             content={"status": "error", "detail": "Cannot connect to Colab"},
         )
+    except httpx.ReadTimeout:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "detail": "Colab health check timed out"},
+        )
     except Exception as e:
         return JSONResponse(
             status_code=503,
-            content={"status": "error", "detail": str(e)},
+            content={"status": "error", "detail": f"Connection error: {type(e).__name__}"},
         )
 
 
@@ -129,5 +155,5 @@ async def root():
 if __name__ == "__main__":
     print("Virtual Try-On Local Server")
     print(f"Colab URL: {COLAB_URL or '(not set - configure via frontend)'}")
-    print("Open http://localhost:8080 in your browser")
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    print("Open http://localhost:8090 in your browser")
+    uvicorn.run(app, host="0.0.0.0", port=8090)

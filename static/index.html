@@ -3,137 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Try-On</title>
+    <title>VTRYON — Virtual Try-On Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <h1>Virtual Try-On</h1>
-            <p class="subtitle">Powered by CatVTON</p>
-            <div id="connection-status" class="status-indicator disconnected">
+    <div class="grain-overlay"></div>
+
+    <!-- Connection Bar -->
+    <div class="connection-rail">
+        <div class="connection-inner">
+            <div id="connection-status" class="status-pill disconnected">
                 <span class="status-dot"></span>
                 <span class="status-text">Disconnected</span>
             </div>
-        </header>
+            <div class="url-group">
+                <label class="url-label">GPU Backend</label>
+                <input type="text" id="colab-url-input"
+                       placeholder="Paste your Colab tunnel URL here..."
+                       spellcheck="false">
+                <button id="connect-btn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6.5 3L11.5 8L6.5 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
 
-        <!-- Colab URL Bar -->
-        <div class="colab-url-bar">
-            <input type="text" id="colab-url-input"
-                   placeholder="Paste your Colab ngrok URL here (e.g. https://xxxx.ngrok-free.app)">
-            <button id="connect-btn">Connect</button>
+    <!-- Hero Header -->
+    <header class="hero">
+        <div class="hero-inner">
+            <div class="brand-mark">VTRYON</div>
+            <h1 class="hero-title">Virtual<br>Try-On <em>Studio</em></h1>
+            <p class="hero-sub">AI-powered fashion visualization. Upload a photo, choose a garment, see yourself in it.</p>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+        <!-- Step Indicators -->
+        <div class="step-track">
+            <div class="step-item active" data-step="1">
+                <span class="step-num">01</span>
+                <span class="step-label">Your Photo</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="2">
+                <span class="step-num">02</span>
+                <span class="step-label">Garment</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="3">
+                <span class="step-num">03</span>
+                <span class="step-label">Result</span>
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Left: Inputs -->
-            <section class="input-section">
-                <!-- Person Image -->
-                <div class="upload-card">
-                    <h3>Person Image</h3>
-                    <div class="drop-zone" id="person-drop-zone">
-                        <img id="person-preview" class="preview-image hidden" alt="Person">
-                        <div class="drop-zone-prompt" id="person-prompt">
-                            <div class="upload-icon">&#128100;</div>
-                            <p>Drag & drop or click to upload</p>
-                            <span class="upload-hint">Full body photo works best</span>
-                        </div>
-                        <input type="file" id="person-input" accept="image/*" hidden>
-                    </div>
-                    <button class="clear-btn hidden" id="person-clear">Clear</button>
-                </div>
-
-                <!-- Clothing Image -->
-                <div class="upload-card">
-                    <h3>Clothing Image</h3>
-                    <div class="drop-zone" id="cloth-drop-zone">
-                        <img id="cloth-preview" class="preview-image hidden" alt="Clothing">
-                        <div class="drop-zone-prompt" id="cloth-prompt">
-                            <div class="upload-icon">&#128085;</div>
-                            <p>Drag & drop or click to upload</p>
-                            <span class="upload-hint">Flat lay or white background</span>
-                        </div>
-                        <input type="file" id="cloth-input" accept="image/*" hidden>
-                    </div>
-                    <button class="clear-btn hidden" id="cloth-clear">Clear</button>
-                </div>
-
-                <!-- Cloth Type -->
-                <div class="control-group">
-                    <h3>Clothing Type</h3>
-                    <div class="type-buttons">
-                        <button class="type-btn active" data-type="upper">Upper Body</button>
-                        <button class="type-btn" data-type="lower">Lower Body</button>
-                        <button class="type-btn" data-type="overall">Full Body</button>
+        <!-- Upload Area -->
+        <div class="upload-grid">
+            <!-- Person Upload -->
+            <div class="upload-panel" id="person-panel">
+                <div class="panel-header">
+                    <span class="panel-number">01</span>
+                    <div>
+                        <h2 class="panel-title">Your Photo</h2>
+                        <p class="panel-hint">Full-body photo works best</p>
                     </div>
                 </div>
-
-                <!-- Advanced Settings -->
-                <details class="advanced-settings">
-                    <summary>Advanced Settings</summary>
-                    <div class="settings-content">
-                        <div class="setting-row">
-                            <label>Inference Steps: <span id="steps-value">50</span></label>
-                            <input type="range" id="steps-slider" min="10" max="100" step="5" value="50">
-                            <span class="setting-hint">More steps = better quality, slower</span>
-                        </div>
-                        <div class="setting-row">
-                            <label>CFG Scale: <span id="cfg-value">2.5</span></label>
-                            <input type="range" id="cfg-slider" min="0" max="7.5" step="0.5" value="2.5">
-                            <span class="setting-hint">Higher = more saturated colors</span>
-                        </div>
-                        <div class="setting-row">
-                            <label>Seed:</label>
-                            <input type="number" id="seed-input" value="42" min="-1" max="999999">
-                            <span class="setting-hint">-1 for random</span>
-                        </div>
+                <div class="drop-zone" id="person-drop-zone">
+                    <img id="person-preview" class="preview-image hidden" alt="Person">
+                    <div class="drop-zone-prompt" id="person-prompt">
+                        <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 16V8M12 8L9 11M12 8L15 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        <p>Drag & drop or click</p>
                     </div>
-                </details>
-
-                <!-- Try On Button -->
-                <button id="try-on-btn" class="primary-btn" disabled>
-                    <span class="btn-text">Try On</span>
-                    <span class="spinner hidden" id="spinner"></span>
+                    <input type="file" id="person-input" accept="image/*" hidden>
+                </div>
+                <button class="clear-btn hidden" id="person-clear">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Remove
                 </button>
-                <p id="status-message" class="status-message"></p>
-            </section>
+            </div>
 
-            <!-- Right: Result -->
-            <section class="result-section">
-                <h3>Result</h3>
-                <div class="result-container">
-                    <div class="result-placeholder" id="result-placeholder">
-                        <div class="placeholder-content">
-                            <div class="placeholder-icon">&#128248;</div>
-                            <p>Your try-on result will appear here</p>
-                        </div>
-                    </div>
-                    <div id="result-display" class="result-display hidden">
-                        <div class="comparison-view">
-                            <div class="comparison-item">
-                                <span class="comparison-label">Original</span>
-                                <img id="result-person" class="comparison-img" alt="Original">
-                            </div>
-                            <div class="comparison-divider"></div>
-                            <div class="comparison-item">
-                                <span class="comparison-label">Result</span>
-                                <img id="result-image" class="comparison-img" alt="Result">
-                            </div>
-                        </div>
-                        <div class="result-info">
-                            <span id="elapsed-time"></span>
-                        </div>
-                        <button id="download-btn" class="secondary-btn">Download Result</button>
+            <!-- Clothing Upload -->
+            <div class="upload-panel" id="cloth-panel">
+                <div class="panel-header">
+                    <span class="panel-number">02</span>
+                    <div>
+                        <h2 class="panel-title">Garment</h2>
+                        <p class="panel-hint">Flat lay or white background</p>
                     </div>
                 </div>
-            </section>
-        </main>
+                <div class="drop-zone" id="cloth-drop-zone">
+                    <img id="cloth-preview" class="preview-image hidden" alt="Clothing">
+                    <div class="drop-zone-prompt" id="cloth-prompt">
+                        <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 16V8M12 8L9 11M12 8L15 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        <p>Drag & drop or click</p>
+                    </div>
+                    <input type="file" id="cloth-input" accept="image/*" hidden>
+                </div>
+                <button class="clear-btn hidden" id="cloth-clear">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Remove
+                </button>
+            </div>
+        </div>
 
-        <footer class="app-footer">
-            <p>CatVTON: Concatenation Is All You Need for Virtual Try-On</p>
-        </footer>
-    </div>
+        <!-- Controls Row -->
+        <div class="controls-row">
+            <div class="garment-type-group">
+                <span class="control-label">Garment Type</span>
+                <div class="type-buttons">
+                    <button class="type-btn active" data-type="upper">Upper</button>
+                    <button class="type-btn" data-type="lower">Lower</button>
+                    <button class="type-btn" data-type="overall">Full Body</button>
+                </div>
+            </div>
+            <button id="try-on-btn" class="generate-btn" disabled>
+                <span class="btn-text">Generate Try-On</span>
+                <span class="spinner hidden" id="spinner"></span>
+                <svg class="btn-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <p id="status-message" class="status-message"></p>
+
+        <!-- Result Section -->
+        <section class="result-section" id="result-section">
+            <div class="result-placeholder" id="result-placeholder">
+                <div class="placeholder-inner">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" opacity="0.3">
+                        <rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="8.5" cy="8.5" r="2" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M2 14.5L6.59 11.41C7.37 10.87 8.43 10.92 9.15 11.53L14 15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M13 14L15.59 11.91C16.37 11.28 17.53 11.35 18.22 12.07L22 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <p>Your try-on result will appear here</p>
+                </div>
+            </div>
+            <div id="result-display" class="result-display hidden">
+                <div class="comparison-view">
+                    <div class="comparison-item">
+                        <span class="comparison-label">Original</span>
+                        <img id="result-person" class="comparison-img" alt="Original">
+                    </div>
+                    <div class="comparison-divider">
+                        <span class="divider-icon">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8H12M12 8L9 5M12 8L9 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Try-On Result</span>
+                        <img id="result-image" class="comparison-img" alt="Result">
+                    </div>
+                </div>
+                <div class="result-footer">
+                    <span id="elapsed-time" class="elapsed-time"></span>
+                    <button id="download-btn" class="download-btn">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 2V10M8 10L5 7M8 10L11 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12V13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>Powered by <strong>CatVTON</strong> — Concatenation Is All You Need for Virtual Try-On</p>
+    </footer>
 
     <script src="/static/app.js"></script>
 </body>

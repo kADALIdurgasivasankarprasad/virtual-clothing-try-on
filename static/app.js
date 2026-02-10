@@ -4,6 +4,7 @@ const state = {
     clothFile: null,
     clothType: "upper",
     connected: false,
+    processing: false,
 };
 
 // ===== DOM REFS =====
@@ -26,11 +27,7 @@ const personClear = $("#person-clear");
 const clothClear = $("#cloth-clear");
 
 const typeButtons = document.querySelectorAll(".type-btn");
-const stepsSlider = $("#steps-slider");
-const stepsValue = $("#steps-value");
-const cfgSlider = $("#cfg-slider");
-const cfgValue = $("#cfg-value");
-const seedInput = $("#seed-input");
+const stepItems = document.querySelectorAll(".step-item");
 
 const tryOnBtn = $("#try-on-btn");
 const btnText = $(".btn-text");
@@ -43,6 +40,23 @@ const resultPerson = $("#result-person");
 const resultImage = $("#result-image");
 const elapsedTime = $("#elapsed-time");
 const downloadBtn = $("#download-btn");
+
+// ===== STEP TRACKER =====
+
+function updateSteps() {
+    stepItems.forEach((item) => item.classList.remove("active"));
+
+    if (!state.personFile && !state.clothFile) {
+        stepItems[0].classList.add("active");
+    } else if (state.personFile && !state.clothFile) {
+        stepItems[0].classList.add("active");
+        stepItems[1].classList.add("active");
+    } else if (state.personFile && state.clothFile) {
+        stepItems[0].classList.add("active");
+        stepItems[1].classList.add("active");
+        stepItems[2].classList.add("active");
+    }
+}
 
 // ===== CONNECTION =====
 
@@ -80,18 +94,18 @@ connectBtn.addEventListener("click", async () => {
     }
 });
 
-// Allow pressing Enter in URL input
 colabUrlInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") connectBtn.click();
 });
 
 async function checkHealth() {
+    if (state.processing) return;
     setConnectionStatus("checking", "Checking...");
     try {
         const resp = await fetch("/api/health");
         const data = await resp.json();
         if (data.status === "ok") {
-            setConnectionStatus("connected", `Connected - ${data.gpu}`);
+            setConnectionStatus("connected", `Connected — ${data.gpu}`);
             state.connected = true;
         } else {
             setConnectionStatus("disconnected", data.detail || "Not connected");
@@ -105,7 +119,7 @@ async function checkHealth() {
 }
 
 function setConnectionStatus(cls, text) {
-    connectionStatus.className = `status-indicator ${cls}`;
+    connectionStatus.className = `status-pill ${cls}`;
     statusText.textContent = text;
 }
 
@@ -156,6 +170,7 @@ function setupDropZone(dropZone, fileInput, previewImg, promptEl, clearBtn, file
         clearBtn.classList.add("hidden");
         fileInput.value = "";
         updateTryOnButton();
+        updateSteps();
     });
 }
 
@@ -170,6 +185,7 @@ function handleFile(file, previewImg, promptEl, clearBtn, fileKey) {
     };
     reader.readAsDataURL(file);
     updateTryOnButton();
+    updateSteps();
 }
 
 setupDropZone(personDropZone, personInput, personPreview, personPrompt, personClear, "personFile");
@@ -185,16 +201,6 @@ typeButtons.forEach((btn) => {
     });
 });
 
-// ===== SLIDERS =====
-
-stepsSlider.addEventListener("input", () => {
-    stepsValue.textContent = stepsSlider.value;
-});
-
-cfgSlider.addEventListener("input", () => {
-    cfgValue.textContent = cfgSlider.value;
-});
-
 // ===== BUTTON STATE =====
 
 function updateTryOnButton() {
@@ -207,7 +213,9 @@ tryOnBtn.addEventListener("click", async () => {
     if (tryOnBtn.disabled) return;
 
     // Loading state
+    state.processing = true;
     tryOnBtn.disabled = true;
+    tryOnBtn.classList.add("loading");
     btnText.textContent = "Processing...";
     spinner.classList.remove("hidden");
     statusMessage.textContent = "Sending images to GPU server...";
@@ -219,13 +227,13 @@ tryOnBtn.addEventListener("click", async () => {
     formData.append("person_image", state.personFile);
     formData.append("cloth_image", state.clothFile);
     formData.append("cloth_type", state.clothType);
-    formData.append("num_inference_steps", stepsSlider.value);
-    formData.append("guidance_scale", cfgSlider.value);
-    formData.append("seed", seedInput.value);
+    formData.append("num_inference_steps", "50");
+    formData.append("guidance_scale", "2.5");
+    formData.append("seed", "42");
 
     try {
         const startTime = Date.now();
-        statusMessage.textContent = "Running inference on GPU... This may take 30-60 seconds.";
+        statusMessage.textContent = "Running inference on GPU... This may take 30–60 seconds.";
 
         const resp = await fetch("/api/try-on", {
             method: "POST",
@@ -240,9 +248,12 @@ tryOnBtn.addEventListener("click", async () => {
             resultImage.src = `data:image/png;base64,${data.result_image}`;
             resultPlaceholder.classList.add("hidden");
             resultDisplay.classList.remove("hidden");
-            elapsedTime.textContent = `GPU: ${data.elapsed_seconds}s | Total: ${clientElapsed}s`;
+            elapsedTime.textContent = `GPU: ${data.elapsed_seconds}s  |  Total: ${clientElapsed}s`;
             statusMessage.textContent = "Done!";
             statusMessage.style.color = "var(--success)";
+
+            // Scroll result into view
+            document.getElementById("result-section").scrollIntoView({ behavior: "smooth", block: "center" });
         } else {
             statusMessage.textContent = `Error: ${data.detail || "Unknown error"}`;
             statusMessage.style.color = "var(--error)";
@@ -251,8 +262,10 @@ tryOnBtn.addEventListener("click", async () => {
         statusMessage.textContent = `Network error: ${e.message}`;
         statusMessage.style.color = "var(--error)";
     } finally {
+        state.processing = false;
+        tryOnBtn.classList.remove("loading");
         tryOnBtn.disabled = false;
-        btnText.textContent = "Try On";
+        btnText.textContent = "Generate Try-On";
         spinner.classList.add("hidden");
         updateTryOnButton();
         setTimeout(() => {
@@ -272,3 +285,4 @@ downloadBtn.addEventListener("click", () => {
 
 // ===== INIT =====
 loadColabUrl();
+updateSteps();
