@@ -227,7 +227,7 @@ tryOnBtn.addEventListener("click", async () => {
     formData.append("person_image", state.personFile);
     formData.append("cloth_image", state.clothFile);
     formData.append("cloth_type", state.clothType);
-    formData.append("num_inference_steps", "50");
+    formData.append("num_inference_steps", "30");
     formData.append("guidance_scale", "2.5");
     formData.append("seed", "42");
 
