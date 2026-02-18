@@ -228,12 +228,12 @@ tryOnBtn.addEventListener("click", async () => {
     formData.append("cloth_image", state.clothFile);
     formData.append("cloth_type", state.clothType);
     formData.append("num_inference_steps", "30");
-    formData.append("guidance_scale", "2.5");
+    formData.append("guidance_scale", "4.0");
     formData.append("seed", "42");
 
     try {
         const startTime = Date.now();
-        statusMessage.textContent = "Running inference on GPU... This may take 30–60 seconds.";
+        statusMessage.textContent = "Running inference on GPU... This may take 60–90 seconds.";
 
         const resp = await fetch("/api/try-on", {
             method: "POST",
