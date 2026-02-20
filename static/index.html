@@ -53,11 +53,16 @@
             <div class="step-connector"></div>
             <div class="step-item" data-step="2">
                 <span class="step-num">02</span>
-                <span class="step-label">Garment</span>
+                <span class="step-label">Upper</span>
             </div>
             <div class="step-connector"></div>
             <div class="step-item" data-step="3">
                 <span class="step-num">03</span>
+                <span class="step-label">Lower</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item" data-step="4">
+                <span class="step-num">04</span>
                 <span class="step-label">Result</span>
             </div>
         </div>
@@ -90,42 +95,75 @@
                 </button>
             </div>
 
-            <!-- Clothing Upload -->
-            <div class="upload-panel" id="cloth-panel">
-                <div class="panel-header">
-                    <span class="panel-number">02</span>
-                    <div>
-                        <h2 class="panel-title">Garment</h2>
-                        <p class="panel-hint">Flat lay or white background</p>
+            <!-- Garment Column (Upper + Lower) -->
+            <div class="garment-column">
+                <!-- Upper Garment -->
+                <div class="upload-panel" id="cloth-panel">
+                    <div class="panel-header">
+                        <span class="panel-number">02</span>
+                        <div>
+                            <h2 class="panel-title">Upper Garment</h2>
+                            <p class="panel-hint">Shirt, jacket, top</p>
+                        </div>
                     </div>
-                </div>
-                <div class="drop-zone" id="cloth-drop-zone">
-                    <img id="cloth-preview" class="preview-image hidden" alt="Clothing">
-                    <div class="drop-zone-prompt" id="cloth-prompt">
-                        <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 16V8M12 8L9 11M12 8L15 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"/>
-                        </svg>
-                        <p>Drag & drop or click</p>
+                    <div class="drop-zone drop-zone-sm" id="cloth-drop-zone">
+                        <img id="cloth-preview" class="preview-image hidden" alt="Upper Garment">
+                        <div class="drop-zone-prompt" id="cloth-prompt">
+                            <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 16V8M12 8L9 11M12 8L15 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            <p>Drag & drop or click</p>
+                        </div>
+                        <input type="file" id="cloth-input" accept="image/*" hidden>
                     </div>
-                    <input type="file" id="cloth-input" accept="image/*" hidden>
+                    <button class="clear-btn hidden" id="cloth-clear">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Remove
+                    </button>
                 </div>
-                <button class="clear-btn hidden" id="cloth-clear">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    Remove
-                </button>
+
+                <!-- Lower Garment (Optional) -->
+                <div class="upload-panel" id="cloth2-panel">
+                    <div class="panel-header">
+                        <span class="panel-number">03</span>
+                        <div>
+                            <h2 class="panel-title">Lower Garment <span class="optional-badge">Optional</span></h2>
+                            <p class="panel-hint">Pants, skirt, shorts</p>
+                        </div>
+                    </div>
+                    <div class="drop-zone drop-zone-sm" id="cloth2-drop-zone">
+                        <img id="cloth2-preview" class="preview-image hidden" alt="Lower Garment">
+                        <div class="drop-zone-prompt" id="cloth2-prompt">
+                            <svg class="upload-icon" width="32" height="32" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 16V8M12 8L9 11M12 8L15 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            <p>Drag & drop or click</p>
+                        </div>
+                        <input type="file" id="cloth2-input" accept="image/*" hidden>
+                    </div>
+                    <button class="clear-btn hidden" id="cloth2-clear">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Remove
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- Controls Row -->
         <div class="controls-row">
-            <div class="garment-type-group">
+            <div class="garment-type-group" id="garment-type-group">
                 <span class="control-label">Garment Type</span>
                 <div class="type-buttons">
                     <button class="type-btn active" data-type="upper">Upper</button>
                     <button class="type-btn" data-type="lower">Lower</button>
                     <button class="type-btn" data-type="overall">Full Body</button>
                 </div>
+            </div>
+            <div class="dual-mode-info hidden" id="dual-mode-info">
+                <span class="control-label">Mode</span>
+                <div class="dual-badge">Upper + Lower (2-pass inference)</div>
             </div>
             <button id="try-on-btn" class="generate-btn" disabled>
                 <span class="btn-text">Generate Try-On</span>
