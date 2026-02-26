@@ -96,7 +96,6 @@ async def health_proxy():
 async def try_on_proxy(
     person_image: UploadFile = File(...),
     cloth_image: UploadFile = File(...),
-    cloth2_image: UploadFile = File(None),
     cloth_type: str = Form("upper"),
     num_inference_steps: int = Form(50),
     guidance_scale: float = Form(2.5),
@@ -107,21 +106,23 @@ async def try_on_proxy(
 
     person_bytes = await person_image.read()
     cloth_bytes = await cloth_image.read()
-    cloth2_bytes = await cloth2_image.read() if cloth2_image else None
-
-    files = {
-        "person_image": (person_image.filename, person_bytes, person_image.content_type),
-        "cloth_image": (cloth_image.filename, cloth_bytes, cloth_image.content_type),
-    }
-    if cloth2_bytes:
-        files["cloth2_image"] = (cloth2_image.filename, cloth2_bytes, cloth2_image.content_type)
 
     try:
-        timeout = 600.0 if cloth2_bytes else 300.0
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        async with httpx.AsyncClient(timeout=300.0) as client:
             resp = await client.post(
                 f"{COLAB_URL}/api/try-on",
-                files=files,
+                files={
+                    "person_image": (
+                        person_image.filename,
+                        person_bytes,
+                        person_image.content_type,
+                    ),
+                    "cloth_image": (
+                        cloth_image.filename,
+                        cloth_bytes,
+                        cloth_image.content_type,
+                    ),
+                },
                 data={
                     "cloth_type": cloth_type,
                     "num_inference_steps": str(num_inference_steps),

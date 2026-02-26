@@ -330,54 +330,6 @@ body {
     animation: fadeUp 0.8s var(--ease-out) 0.4s both;
 }
 
-.garment-column {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.garment-column .upload-panel {
-    flex: 1;
-}
-
-.drop-zone-sm {
-    min-height: 150px !important;
-    padding: 24px 16px !important;
-}
-
-.optional-badge {
-    font-family: var(--font-body);
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: var(--bg-warm);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 2px 7px;
-    vertical-align: middle;
-    margin-left: 6px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-.dual-mode-info {
-    flex: 1;
-}
-
-.dual-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: var(--accent-glow);
-    border: 1px solid rgba(184, 115, 51, 0.25);
-    border-radius: 8px;
-    color: var(--accent-deep);
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 8px;
-}
-
 .upload-panel {
     background: var(--bg-panel);
     border: 1px solid var(--border);

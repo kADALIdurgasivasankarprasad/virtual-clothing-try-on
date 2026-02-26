@@ -2,7 +2,6 @@
 const state = {
     personFile: null,
     clothFile: null,
-    cloth2File: null,
     clothType: "upper",
     connected: false,
     processing: false,
@@ -18,21 +17,14 @@ const statusText = $(".status-text");
 
 const personDropZone = $("#person-drop-zone");
 const clothDropZone = $("#cloth-drop-zone");
-const cloth2DropZone = $("#cloth2-drop-zone");
 const personInput = $("#person-input");
 const clothInput = $("#cloth-input");
-const cloth2Input = $("#cloth2-input");
 const personPreview = $("#person-preview");
 const clothPreview = $("#cloth-preview");
-const cloth2Preview = $("#cloth2-preview");
 const personPrompt = $("#person-prompt");
 const clothPrompt = $("#cloth-prompt");
-const cloth2Prompt = $("#cloth2-prompt");
 const personClear = $("#person-clear");
 const clothClear = $("#cloth-clear");
-const cloth2Clear = $("#cloth2-clear");
-const garmentTypeGroup = $("#garment-type-group");
-const dualModeInfo = $("#dual-mode-info");
 
 const typeButtons = document.querySelectorAll(".type-btn");
 const stepItems = document.querySelectorAll(".step-item");
@@ -54,16 +46,16 @@ const downloadBtn = $("#download-btn");
 function updateSteps() {
     stepItems.forEach((item) => item.classList.remove("active"));
 
-    if (state.personFile) stepItems[0].classList.add("active");
-    if (state.clothFile) stepItems[1].classList.add("active");
-    if (state.cloth2File) stepItems[2].classList.add("active");
-    if (state.personFile && state.clothFile) stepItems[3].classList.add("active");
-}
-
-function updateDualMode() {
-    const isDual = !!state.cloth2File;
-    garmentTypeGroup.classList.toggle("hidden", isDual);
-    dualModeInfo.classList.toggle("hidden", !isDual);
+    if (!state.personFile && !state.clothFile) {
+        stepItems[0].classList.add("active");
+    } else if (state.personFile && !state.clothFile) {
+        stepItems[0].classList.add("active");
+        stepItems[1].classList.add("active");
+    } else if (state.personFile && state.clothFile) {
+        stepItems[0].classList.add("active");
+        stepItems[1].classList.add("active");
+        stepItems[2].classList.add("active");
+    }
 }
 
 // ===== CONNECTION =====
@@ -179,7 +171,6 @@ function setupDropZone(dropZone, fileInput, previewImg, promptEl, clearBtn, file
         fileInput.value = "";
         updateTryOnButton();
         updateSteps();
-        updateDualMode();
     });
 }
 
@@ -195,12 +186,10 @@ function handleFile(file, previewImg, promptEl, clearBtn, fileKey) {
     reader.readAsDataURL(file);
     updateTryOnButton();
     updateSteps();
-    updateDualMode();
 }
 
 setupDropZone(personDropZone, personInput, personPreview, personPrompt, personClear, "personFile");
 setupDropZone(clothDropZone, clothInput, clothPreview, clothPrompt, clothClear, "clothFile");
-setupDropZone(cloth2DropZone, cloth2Input, cloth2Preview, cloth2Prompt, cloth2Clear, "cloth2File");
 
 // ===== CLOTH TYPE =====
 
@@ -218,7 +207,6 @@ function updateTryOnButton() {
     tryOnBtn.disabled = !(state.personFile && state.clothFile && state.connected);
 }
 
-
 // ===== TRY ON =====
 
 tryOnBtn.addEventListener("click", async () => {
@@ -235,21 +223,17 @@ tryOnBtn.addEventListener("click", async () => {
     resultPlaceholder.classList.remove("hidden");
     resultDisplay.classList.add("hidden");
 
-    const isDual = !!state.cloth2File;
     const formData = new FormData();
     formData.append("person_image", state.personFile);
     formData.append("cloth_image", state.clothFile);
-    formData.append("cloth_type", isDual ? "upper" : state.clothType);
-    formData.append("num_inference_steps", isDual ? "20" : "30");
+    formData.append("cloth_type", state.clothType);
+    formData.append("num_inference_steps", "30");
     formData.append("guidance_scale", "4.0");
     formData.append("seed", "42");
-    if (isDual) formData.append("cloth2_image", state.cloth2File);
 
     try {
         const startTime = Date.now();
-        statusMessage.textContent = isDual
-            ? "Running 2-pass inference (upper + lower)... This may take 60–90 seconds."
-            : "Running inference on GPU... This may take 60–90 seconds.";
+        statusMessage.textContent = "Running inference on GPU... This may take 60–90 seconds.";
 
         const resp = await fetch("/api/try-on", {
             method: "POST",
@@ -302,4 +286,3 @@ downloadBtn.addEventListener("click", () => {
 // ===== INIT =====
 loadColabUrl();
 updateSteps();
-updateDualMode();
